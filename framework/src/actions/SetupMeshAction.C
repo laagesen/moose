@@ -26,6 +26,7 @@ InputParameters validParams<SetupMeshAction>()
   params.set<std::string>("type") = "FileMesh";
 
   params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order mesh.  Note: This is NOT needed if you are reading an actual first order mesh.");
+  params.addParam<bool>("first_order", false, "Converts a higher order mesh to a first order mesh.");
 
   params.addParam<std::vector<SubdomainID> >("block_id", "IDs of the block id/name pairs");
   params.addParam<std::vector<SubdomainName> >("block_name", "Names of the block id/name pairs (must correspond with \"block_id\"");
@@ -78,6 +79,8 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 
   if (getParam<bool>("second_order"))
     mesh->getMesh().all_second_order(true);
+  if (getParam<bool>("first_order"))
+    mesh->getMesh().all_first_order();
 
 #ifdef LIBMESH_ENABLE_AMR
   unsigned int level = getParam<unsigned int>("uniform_refine");
