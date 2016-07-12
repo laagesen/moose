@@ -60,6 +60,22 @@
   [../]
 []
 
+[AuxVariables]
+  [./unique_bubbles]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_bubbles
+    bubble_object = n_particles
+    field_display = UNIQUE_REGION
+  [../]
+[]
+
 [ICs]
   [./c_ic]
     type = MultiSmoothCircleIC
@@ -307,6 +323,7 @@
     bubble_volume_file = bubble_volume
     threshold = 0.5
     #use_less_than_threshold_comparison = false
+    flood_entity_type = ELEMENTAL
   [../]
 []
 
