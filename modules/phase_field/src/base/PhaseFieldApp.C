@@ -91,6 +91,7 @@
 #include "MultiSmoothSuperellipsoidIC.h"
 #include "PFCFreezingIC.h"
 #include "PolycrystalColoringIC.h"
+#include "PolycrystalHexVoidIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalVoronoiVoidIC.h"
 #include "RampIC.h"
@@ -379,6 +380,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(MultiSmoothSuperellipsoidIC);
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalColoringIC);
+  registerInitialCondition(PolycrystalHexVoidIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalVoronoiVoidIC);
   registerInitialCondition(RampIC);
