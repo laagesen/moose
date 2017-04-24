@@ -15,6 +15,8 @@ PolycrystalHexVoidIC::actionParameters()
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>(
       "grain_num", "Number of grains being represented by the order parameters");
+  params.addRequiredParam<unsigned int>("edge_bub",
+                                        "Number of bubbles on grain edges (trijunctions)");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
   return params;
@@ -43,6 +45,7 @@ PolycrystalHexVoidIC::PolycrystalHexVoidIC(const InputParameters & parameters)
     _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("op_index")),
+    _edge_bub(getParam<unsigned int>("edge_bub")),
     _rand_seed(getParam<unsigned int>("rand_seed"))
 {
   if (_invalue < _outvalue)
@@ -85,9 +88,9 @@ PolycrystalHexVoidIC::initialSetup()
 void
 PolycrystalHexVoidIC::computeCircleRadii()
 {
-  _radii.resize(_numbub+2);
+  _radii.resize(_numbub + _edge_bub);
 
-  for (unsigned int i = 0; i < _numbub+2; i++)
+  for (unsigned int i = 0; i < _numbub + _edge_bub; i++)
   {
     // Vary bubble radius
     switch (_radius_variation_type)
@@ -109,21 +112,21 @@ PolycrystalHexVoidIC::computeCircleRadii()
 void
 PolycrystalHexVoidIC::computeCircleCenters()
 {
-  _centers.resize(_numbub+2);
+  _centers.resize(_numbub + _edge_bub);
 
-  Point center_0, center_1;
-  center_0(0) = 0;
-  center_0(1) = 3.0/16.0 * _range(1);
-  center_0(2) = 0;
-  center_1(0) = 0.25 * _range(0);
-  center_1(1) = 5.0/16.0 * _range(1);
-  center_1(2) = 0;
+  // Point center_0, center_1;
+  // center_0(0) = 0;
+  // center_0(1) = 3.0/16.0 * _range(1);
+  // center_0(2) = 0;
+  // center_1(0) = 0.25 * _range(0);
+  // center_1(1) = 5.0/16.0 * _range(1);
+  // center_1(2) = 0;
+  //
+  // _centers[0] = center_0;
+  // _centers[1] = center_1;
 
-  _centers[0] = center_0;
-  _centers[1] = center_1;
-
-  // This Code will place void center points on grain boundaries
-  for (unsigned int vp = 2; vp < _numbub+2; ++vp)
+  // First place bubbles on grain edges (trijunctions in Hex geometry)
+  for (unsigned int vp = 0; vp < _edge_bub; ++vp)
   {
     bool try_again;
     unsigned int num_tries = 0;
@@ -134,7 +137,65 @@ PolycrystalHexVoidIC::computeCircleCenters()
       num_tries++;
 
       if (num_tries > _max_num_tries)
-        mooseError("Too many tries of assigning void centers in "
+        mooseError("Too many tries of assigning void centers on grain edges in "
+                   "PolycrystalHexVoidIC");
+
+      // Pick from 8 possible trijunctions in the 4-grain hexagonal arrangement
+      const unsigned int trij_index =
+          static_cast<unsigned int>(std::floor(MooseRandom::rand() * 8.0));
+
+      Point rand_point;
+
+      switch (trij_index)
+      {
+        case 0:
+          rand_point(0) = _bottom_left(0);
+          rand_point(1) = _bottom_left(1) + 3.0 / 16.0 * _range(1);
+        case 1:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 2:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 3:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 4:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 5:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 6:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+        case 7:
+          rand_point(0) = 0;
+          rand_point(1) = 3.0 / 16.0 * _range(1);
+
+        default:
+          mooseError("Invalid location for grain edge bubble in PolycrystalHexVoidIC");
+          break;
+      }
+
+      rand_point(2) = 0;
+
+    } while (try_again == true);
+  }
+
+  // Next place bubbles on grain boundaries
+  for (unsigned int vp = _edge_bub; vp < _numbub + _edge_bub; ++vp)
+  {
+    bool try_again;
+    unsigned int num_tries = 0;
+
+    do
+    {
+      try_again = false;
+      num_tries++;
+
+      if (num_tries > _max_num_tries)
+        mooseError("Too many tries of assigning void centers on grain boundaries in "
                    "PolycrystalHexVoidIC");
 
       Point rand_point;
