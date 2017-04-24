@@ -40,6 +40,7 @@ protected:
 
   const unsigned int _rand_seed;
 
+  virtual void computeCircleRadii() override;
   virtual void computeCircleCenters() override;
 
   virtual Real value(const Point & p) override;

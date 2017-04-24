@@ -83,12 +83,47 @@ PolycrystalHexVoidIC::initialSetup()
 }
 
 void
+PolycrystalHexVoidIC::computeCircleRadii()
+{
+  _radii.resize(_numbub+2);
+
+  for (unsigned int i = 0; i < _numbub+2; i++)
+  {
+    // Vary bubble radius
+    switch (_radius_variation_type)
+    {
+      case 0: // Uniform distribution
+        _radii[i] = _radius * (1.0 + (1.0 - 2.0 * _random.rand(_tid)) * _radius_variation);
+        break;
+      case 1: // Normal distribution
+        _radii[i] = _random.randNormal(_tid, _radius, _radius_variation);
+        break;
+      case 2: // No variation
+        _radii[i] = _radius;
+    }
+
+    _radii[i] = std::max(_radii[i], 0.0);
+  }
+}
+
+void
 PolycrystalHexVoidIC::computeCircleCenters()
 {
-  _centers.resize(_numbub);
+  _centers.resize(_numbub+2);
+
+  Point center_0, center_1;
+  center_0(0) = 0;
+  center_0(1) = 3.0/16.0 * _range(1);
+  center_0(2) = 0;
+  center_1(0) = 0.25 * _range(0);
+  center_1(1) = 5.0/16.0 * _range(1);
+  center_1(2) = 0;
+
+  _centers[0] = center_0;
+  _centers[1] = center_1;
 
   // This Code will place void center points on grain boundaries
-  for (unsigned int vp = 0; vp < _numbub; ++vp)
+  for (unsigned int vp = 2; vp < _numbub+2; ++vp)
   {
     bool try_again;
     unsigned int num_tries = 0;
