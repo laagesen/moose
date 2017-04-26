@@ -38,7 +38,7 @@ protected:
   const unsigned int _grain_num;
   const unsigned int _op_index;
 
-  const unsigned int _edge_bub;
+  const unsigned int _trij_bub;
 
   const unsigned int _rand_seed;
 

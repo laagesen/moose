@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "PolycrystalHexVoidIC.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+
 
 InputParameters
 PolycrystalHexVoidIC::actionParameters()
@@ -15,7 +17,7 @@ PolycrystalHexVoidIC::actionParameters()
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>(
       "grain_num", "Number of grains being represented by the order parameters");
-  params.addRequiredParam<unsigned int>("edge_bub",
+  params.addRequiredParam<unsigned int>("trij_bub",
                                         "Number of bubbles on grain edges (trijunctions)");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
@@ -45,7 +47,7 @@ PolycrystalHexVoidIC::PolycrystalHexVoidIC(const InputParameters & parameters)
     _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("op_index")),
-    _edge_bub(getParam<unsigned int>("edge_bub")),
+    _trij_bub(getParam<unsigned int>("trij_bub")),
     _rand_seed(getParam<unsigned int>("rand_seed"))
 {
   if (_invalue < _outvalue)
@@ -88,9 +90,9 @@ PolycrystalHexVoidIC::initialSetup()
 void
 PolycrystalHexVoidIC::computeCircleRadii()
 {
-  _radii.resize(_numbub + _edge_bub);
+  _radii.resize(_numbub + _trij_bub);
 
-  for (unsigned int i = 0; i < _numbub + _edge_bub; i++)
+  for (unsigned int i = 0; i < _numbub + _trij_bub; i++)
   {
     // Vary bubble radius
     switch (_radius_variation_type)
@@ -112,7 +114,7 @@ PolycrystalHexVoidIC::computeCircleRadii()
 void
 PolycrystalHexVoidIC::computeCircleCenters()
 {
-  _centers.resize(_numbub + _edge_bub);
+  _centers.resize(_numbub + _trij_bub);
 
   // Point center_0, center_1;
   // center_0(0) = 0;
@@ -126,7 +128,7 @@ PolycrystalHexVoidIC::computeCircleCenters()
   // _centers[1] = center_1;
 
   // First place bubbles on grain edges (trijunctions in Hex geometry)
-  for (unsigned int vp = 0; vp < _edge_bub; ++vp)
+  for (unsigned int vp = 0; vp < _trij_bub; ++vp)
   {
     bool try_again;
     unsigned int num_tries = 0;
@@ -137,7 +139,7 @@ PolycrystalHexVoidIC::computeCircleCenters()
       num_tries++;
 
       if (num_tries > _max_num_tries)
-        mooseError("Too many tries of assigning void centers on grain edges in "
+        mooseError("Too many tries of assigning void centers on trijunctions in "
                    "PolycrystalHexVoidIC");
 
       // Pick from 8 possible trijunctions in the 4-grain hexagonal arrangement
@@ -151,40 +153,61 @@ PolycrystalHexVoidIC::computeCircleCenters()
         case 0:
           rand_point(0) = _bottom_left(0);
           rand_point(1) = _bottom_left(1) + 3.0 / 16.0 * _range(1);
+          break;
         case 1:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.25 * _range(0);
+          rand_point(1) = _bottom_left(1) + 5.0 / 16.0 * _range(1);
+          break;
         case 2:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.50 * _range(0);
+          rand_point(1) = _bottom_left(1) + 3.0 / 16.0 * _range(1);
+          break;
         case 3:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.75 * _range(0);
+          rand_point(1) = _bottom_left(1) + 5.0 / 16.0 * _range(1);
+          break;
         case 4:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0);
+          rand_point(1) = _bottom_left(1) + 13.0 / 16.0 * _range(1);
+          break;
         case 5:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.25 * _range(0);
+          rand_point(1) = _bottom_left(1) + 11.0 / 16.0 * _range(1);
+          break;
         case 6:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.50 * _range(0);
+          rand_point(1) = _bottom_left(1) + 13.0 / 16.0 * _range(1);
+          break;
         case 7:
-          rand_point(0) = 0;
-          rand_point(1) = 3.0 / 16.0 * _range(1);
+          rand_point(0) = _bottom_left(0) + 0.75 * _range(0);
+          rand_point(1) = _bottom_left(1) + 11.0 / 16.0 * _range(1);
+          break;
 
         default:
-          mooseError("Invalid location for grain edge bubble in PolycrystalHexVoidIC");
+          mooseError("Invalid location for trijunction bubble in PolycrystalHexVoidIC");
           break;
       }
 
-      rand_point(2) = 0;
+      if (LIBMESH_DIM == 3)
+        rand_point(2) = _bottom_left(2) + _range(2) * MooseRandom::rand();
+      else
+        rand_point(2) = 0;
+
+      _centers[vp] = rand_point;
+
+      for (unsigned int i = 0; i < vp; ++i)
+      {
+        Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[vp], _centers[i]);
+
+        if (dist < _bubspac)
+          try_again = true;
+      }
 
     } while (try_again == true);
   }
 
   // Next place bubbles on grain boundaries
-  for (unsigned int vp = _edge_bub; vp < _numbub + _edge_bub; ++vp)
+  for (unsigned int vp = _trij_bub; vp < _numbub + _trij_bub; ++vp)
   {
     bool try_again;
     unsigned int num_tries = 0;
@@ -203,7 +226,7 @@ PolycrystalHexVoidIC::computeCircleCenters()
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         rand_point(i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
 
-      _console << "random point" << rand_point << std::endl;
+      // _console << "random point" << rand_point << std::endl;
       // Allow the vectors to be sorted based on their distance from the
       // rand_point
       std::vector<PolycrystalHexVoidIC::DistancePoint> diff(_grain_num);
@@ -231,8 +254,8 @@ PolycrystalHexVoidIC::computeCircleCenters()
       if (rand_point(0) > _range(0) / 2 && next_closest_point(0) == 0.0)
         next_closest_point(0) += _range(0);
 
-      _console << "closest point" << closest_point << std::endl;
-      _console << "next closest point" << next_closest_point << std::endl;
+      // _console << "closest point" << closest_point << std::endl;
+      // _console << "next closest point" << next_closest_point << std::endl;
 
       // Find Slope of Line in the plane orthogonal to the diff_centerpoint
       // vector
@@ -242,19 +265,19 @@ PolycrystalHexVoidIC::computeCircleCenters()
       Point normal_vector = diff_centerpoints.cross(diff_rand_center);
       Point slope = normal_vector.cross(diff_centerpoints);
 
-      _console << "diff centerpoints" << diff_centerpoints << std::endl;
-      _console << "diff_rand_center" << diff_rand_center << std::endl;
-      _console << "normal_vector" << normal_vector << std::endl;
-      _console << "slope" << slope << std::endl;
+      // _console << "diff centerpoints" << diff_centerpoints << std::endl;
+      // _console << "diff_rand_center" << diff_rand_center << std::endl;
+      // _console << "normal_vector" << normal_vector << std::endl;
+      // _console << "slope" << slope << std::endl;
 
       // Midpoint position vector between two center points
       Point midpoint = closest_point + (0.5 * diff_centerpoints);
-      _console << "midpoint" << midpoint << std::endl;
+      // _console << "midpoint" << midpoint << std::endl;
 
       // Solve for the scalar multiplier solution on the line
       Real lambda = 0;
       Point mid_rand_vector = _mesh.minPeriodicVector(_var.number(), midpoint, rand_point);
-      _console << "min_rand_vector" << mid_rand_vector << std::endl;
+      // _console << "min_rand_vector" << mid_rand_vector << std::endl;
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         lambda += (mid_rand_vector(i) * slope(i)) /
@@ -262,7 +285,7 @@ PolycrystalHexVoidIC::computeCircleCenters()
 
       // Assigning points to vector
       _centers[vp] = slope * lambda + midpoint;
-      _console << "center" << _centers[vp] << std::endl;
+      // _console << "center" << _centers[vp] << std::endl;
 
       // Checking to see if points are in the domain ONLY WORKS FOR PERIODIC
       for (unsigned int i = 0; i < LIBMESH_DIM; i++)
