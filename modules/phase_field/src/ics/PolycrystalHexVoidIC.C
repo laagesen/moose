@@ -152,35 +152,35 @@ PolycrystalHexVoidIC::computeCircleCenters()
       {
         case 0:
           rand_point(0) = _bottom_left(0);
-          rand_point(1) = _bottom_left(1) + 3.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 1.0 / 6.0 * _range(1);
           break;
         case 1:
           rand_point(0) = _bottom_left(0) + 0.25 * _range(0);
-          rand_point(1) = _bottom_left(1) + 5.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 1.0 / 3.0 * _range(1);
           break;
         case 2:
           rand_point(0) = _bottom_left(0) + 0.50 * _range(0);
-          rand_point(1) = _bottom_left(1) + 3.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 1.0 / 6.0 * _range(1);
           break;
         case 3:
           rand_point(0) = _bottom_left(0) + 0.75 * _range(0);
-          rand_point(1) = _bottom_left(1) + 5.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 1.0 / 3.0 * _range(1);
           break;
         case 4:
           rand_point(0) = _bottom_left(0);
-          rand_point(1) = _bottom_left(1) + 13.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 5.0 / 6.0 * _range(1);
           break;
         case 5:
           rand_point(0) = _bottom_left(0) + 0.25 * _range(0);
-          rand_point(1) = _bottom_left(1) + 11.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 2.0 / 3.0 * _range(1);
           break;
         case 6:
           rand_point(0) = _bottom_left(0) + 0.50 * _range(0);
-          rand_point(1) = _bottom_left(1) + 13.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 5.0 / 6.0 * _range(1);
           break;
         case 7:
           rand_point(0) = _bottom_left(0) + 0.75 * _range(0);
-          rand_point(1) = _bottom_left(1) + 11.0 / 16.0 * _range(1);
+          rand_point(1) = _bottom_left(1) + 2.0 / 3.0 * _range(1);
           break;
 
         default:
