@@ -1,0 +1,7 @@
+# Multi-Phase, Multi-Order Parameter Grand Potential Phase-field model
+
+Here, we introduce a multi-phase, multi-order parameter model based on a grand potential functional that features the following desirable characteristics: decoupling of interfacial energy from interfacial thickness and the stability of two-phase interfaces with respect to the formation of additional phases. To our knowledge, the only existing multi-phase, multi-order parameter model that features both of these characteristics is the model of Moelans \cite{Moelans2011}, based on the KKS approach. By employing the bulk free energies and interpolation functions from Ref. \cite{Moelans2011} within a grand-potential functional, we retain the decoupling of interfacial thickness and interfacial energy and the stability of binary interfaces, while removing the need for additional phase concentration variables of the KKS approach. This eliminates the need to solve a nonlinear equation for these variables, thus simplifying implementation and reducing computational complexity.
+
+The phase-field model is formulated for $K$ chemical species and $N$ possible phases. For each phase $\alpha$, there are $p_\alpha$ possible grain orientations. The individual grains of phase $\alpha$ are represented by a set of non-conserved order parameters $\eta_{\alpha 1}, \eta_{\alpha 2}, \dots, \eta_{\alpha p_\alpha}$, where the first subscript of each order parameter indexes the phase and the second subscript indexes the grains.
+
+\bibliography{docs/bib/phase_field.bib}
